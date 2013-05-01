@@ -79,10 +79,42 @@ gboolean image_list_has_multiple_files( ImageList* il )
     return (il->list && il->list->next);
 }
 
-gboolean image_list_open_dir( ImageList* il, const char* path, GError** error )
-{
+gboolean  image_list_recurse_dir( ImageList* il, const char* prefix, gboolean recurse){
     const char* name = NULL;
     GDir* dir;
+    GError** error;
+    struct stat stbuf;
+    
+    if( stat( prefix, &stbuf ) == -1 )
+        return FALSE;
+
+    dir = g_dir_open( prefix, 0, error); 
+    if ( ! dir )
+        return FALSE;
+
+    while ( ( name = g_dir_read_name ( dir ) ) )
+    {
+        gchar* newpath = g_strconcat(prefix, "/", name, NULL);
+        if ( ! g_stat( newpath, &stbuf) ){
+            if ( S_ISDIR (stbuf.st_mode)) {
+                if ( recurse ){
+                    image_list_recurse_dir(il, newpath, FALSE);
+                }
+            }
+            else
+            {
+                if( image_list_is_file_supported( newpath ) || S_ISDIR(stbuf.st_mode) )
+                    il->list = g_list_prepend( il->list, g_strndup(newpath +2 , strlen(newpath)-2)) ;
+            }
+        }
+        g_free(newpath);
+    }
+    g_dir_close( dir );
+    return TRUE;
+}
+
+gboolean image_list_open_dir( ImageList* il, const char* path, GError** error, gboolean recurse )
+{
     struct stat stbuf;
 
     if( il->dir_path && 0 == strcmp( path, il->dir_path ) )
@@ -93,24 +125,14 @@ gboolean image_list_open_dir( ImageList* il, const char* path, GError** error )
     if( stat( path, &stbuf ) == -1 )
         return FALSE;
 
-    dir = g_dir_open( path, 0, error );
-    if( ! dir )
-        return FALSE;
-
     il->dir_path = g_strdup( path );
     il->mtime = stbuf.st_mtime;
-
-    while( ( name = g_dir_read_name ( dir ) ) )
-    {
-//        char* file_path = g_build_filename( dir_path, name, NULL );
-        if( image_list_is_file_supported( name ) )
-            il->list = g_list_prepend( il->list, g_strdup(name) );
-//        g_free( file_path );
+    if ( image_list_recurse_dir( il, path, recurse ) ) {
+        il->list = g_list_reverse( il->list );
+        il->current = il->list;
+        return TRUE;
     }
-    g_dir_close( dir );
-    il->list = g_list_reverse( il->list );
-    il->current = il->list;
-    return TRUE;
+    return FALSE;
 }
 
 gboolean image_list_set_current(  ImageList* il,const char* name )

@@ -372,13 +372,18 @@ static void update_btns(MainWin* mw)
 
 gboolean main_win_open( MainWin* mw, const char* file_path, ZoomMode zoom )
 {
-    if (g_file_test(file_path, G_FILE_TEST_IS_DIR))
-    {
-        image_list_open_dir( mw->img_list, file_path, NULL );
+    if ( image_list_is_empty(mw->img_list) ) {
+        
+        char* dir_path = g_path_get_dirname( file_path );
+        image_list_open_dir( mw->img_list, dir_path, NULL, mw->recurse );
         image_list_sort_by_name( mw->img_list, GTK_SORT_DESCENDING );
-        if (image_list_get_first(mw->img_list))
-            main_win_open(mw, image_list_get_current_file_path(mw->img_list), zoom);
-        return;
+        g_free( dir_path );
+        if (g_file_test(file_path, G_FILE_TEST_IS_DIR))
+        {
+            if (image_list_get_first(mw->img_list))
+                main_win_open(mw, image_list_get_current_file_path(mw->img_list), zoom);
+            return;
+        }
     }
 
 
@@ -477,10 +482,6 @@ gboolean main_win_open( MainWin* mw, const char* file_path, ZoomMode zoom )
 //        gtk_main_iteration ();
 
     // build file list
-    char* dir_path = g_path_get_dirname( file_path );
-    image_list_open_dir( mw->img_list, dir_path, NULL );
-    image_list_sort_by_name( mw->img_list, GTK_SORT_DESCENDING );
-    g_free( dir_path );
 
     char* base_name = g_path_get_basename( file_path );
     image_list_set_current( mw->img_list, base_name );
@@ -865,7 +866,7 @@ void on_save_as( GtkWidget* btn, MainWin* mw )
         else /* otherwise reload the whole image list. */
         {
             /* switch to the dir containing the saved file. */
-            image_list_open_dir( mw->img_list, dir, NULL );
+            image_list_open_dir( mw->img_list, dir, NULL, mw->recurse );
         }
         update_title( name, mw );
         g_free( dir );

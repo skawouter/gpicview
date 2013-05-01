@@ -87,6 +87,7 @@ typedef struct _MainWin
     int drag_old_y;
     int rotation_angle;
     ImageList* img_list;
+    gboolean recurse;
 } MainWin;
 
 GtkWidget* main_win_new();

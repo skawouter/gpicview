@@ -44,7 +44,7 @@ ImageList* image_list_new();
 
 const char* image_list_get_dir( ImageList* il );
 
-gboolean image_list_open_dir( ImageList* il, const char* path, GError** error);
+gboolean image_list_open_dir( ImageList* il, const char* path, GError** error, gboolean recurse);
 
 gboolean image_list_set_current( ImageList* il, const char* name );
 

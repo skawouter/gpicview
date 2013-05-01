@@ -32,6 +32,7 @@
 static char** files = NULL;
 static gboolean should_display_version = FALSE;
 static gboolean should_start_slideshow = FALSE;
+static gboolean should_recurse = FALSE;
 
 static GOptionEntry opt_entries[] =
 {
@@ -40,6 +41,8 @@ static GOptionEntry opt_entries[] =
                  N_("Print version information and exit"), NULL },
     {"slideshow", 0, G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE, &should_start_slideshow,
                  N_("Start slideshow"), NULL },
+    {"recursive", 'r', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE, &should_recurse,
+                     N_("Browse all files in all subdirectories"), NULL },
     { NULL }
 };
 
@@ -80,6 +83,7 @@ int main(int argc, char *argv[])
      * We must show the window now in case the file open needs to put up an error dialog. */
     win = (MainWin*)main_win_new();
     gtk_widget_show( GTK_WIDGET(win) );
+    win->recurse = should_recurse;
 
     if ( pref.open_maximized )
         gtk_window_maximize( (GtkWindow*)win );
