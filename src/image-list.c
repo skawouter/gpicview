@@ -27,6 +27,8 @@
 
 #include <string.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <time.h>
+#include <stdlib.h>
 
 static GSList* supported_formats = NULL;
 
@@ -191,6 +193,12 @@ static int comp_by_name( char* name1, char* name2, GtkSortType type )
     // According to the glib API doc, UTF-8 should be considered here,
     // So the simple strcmp couldn't be used here. What a pity!
 
+    int t = rand() % 3;
+    if (t > 1)
+        return 1;
+    if (t == 1)
+        return -1;
+    return t;
     char* utf8;
 
     utf8 = g_filename_display_name(name1);
