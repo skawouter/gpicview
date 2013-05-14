@@ -459,7 +459,7 @@ gboolean main_win_open( MainWin* mw, const char* file_path, ZoomMode zoom )
 
     if( mw->zoom_mode == ZOOM_FIT )
     {
-        main_win_fit_window_size( mw, FALSE, GDK_INTERP_BILINEAR );
+        main_win_fit_window_size( mw, TRUE, GDK_INTERP_BILINEAR );
     }
     else  if( mw->zoom_mode == ZOOM_SCALE )  // scale
     {
@@ -547,7 +547,7 @@ void on_size_allocate( GtkWidget* widget, GtkAllocation    *allocation )
             while(gtk_events_pending ())
                 gtk_main_iteration(); // makes it more fluid
 
-            main_win_fit_window_size( mw, FALSE, GDK_INTERP_BILINEAR );
+            main_win_fit_window_size( mw, TRUE, GDK_INTERP_BILINEAR );
         }
     }
 }
@@ -607,6 +607,7 @@ void main_win_fit_window_size(  MainWin* mw, gboolean can_strech, GdkInterpType 
 
     if( mw->pix == NULL )
         return;
+    can_strech = TRUE;
     main_win_fit_size( mw, mw->scroll_allocation.width, mw->scroll_allocation.height, can_strech, type );
 }
 
@@ -1280,7 +1281,7 @@ void rotate_image( MainWin* mw, int angle )
     image_view_set_pixbuf( (ImageView*)mw->img_view, mw->pix );
 
     if( mw->zoom_mode == ZOOM_FIT )
-        main_win_fit_window_size( mw, FALSE, GDK_INTERP_BILINEAR );
+        main_win_fit_window_size( mw, TRUE, GDK_INTERP_BILINEAR );
 }
 
 gboolean main_win_scale_image( MainWin* mw, double new_scale, GdkInterpType type )
@@ -1608,7 +1609,7 @@ static void main_win_set_zoom_mode(MainWin* mw, ZoomMode mode)
     }
     else if (mode == ZOOM_FIT)
     {
-        main_win_fit_window_size( mw, FALSE, GDK_INTERP_BILINEAR );
+        main_win_fit_window_size( mw, TRUE, GDK_INTERP_BILINEAR );
     }
 }
 
